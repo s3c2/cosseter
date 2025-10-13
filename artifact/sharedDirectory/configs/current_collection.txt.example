@@ -1,0 +1,8 @@
+# This file will be automatically created and updated by the WorkflowFrontend service
+# It contains the current MongoDB collection name being used for workflow IRs
+# 
+# The collection name format is: workflow_irs_<hash>
+# Where <hash> is an 8-character hash of all workflow files and their modification times
+# 
+# This allows the system to create new collections when workflows change
+# and maintain consistency across service restarts

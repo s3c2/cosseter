@@ -1,0 +1,26 @@
+# Requirements for the BashAnalyzer directory Python scripts
+# Generated based on analysis of import statements in all Python files
+
+# Database connectivity
+pymongo>=4.0.0
+
+# Task queue and distributed processing
+celery>=5.2.0
+
+# Redis backend for Celery (commonly used with Celery)
+redis>=4.0.0
+
+# Static analysis tool (required for semgrep commands)
+semgrep>=1.0.0
+
+# Note: The following packages are part of Python standard library and don't need installation:
+# - json
+# - os
+# - sys
+# - subprocess
+# - time
+# - re
+# - csv
+# - pickle
+
+# Note: bson is included with pymongo installation, so no separate requirement needed

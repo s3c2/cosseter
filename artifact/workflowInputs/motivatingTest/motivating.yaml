@@ -1,0 +1,29 @@
+name: build-test-deploy
+permissions:
+  contents: read
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v3
+      - name: use node.js
+        uses: actions/setup-node@v3
+      - run: npm install
+      - run: npm run build
+  deploy:
+    needs: build
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v3
+      - run: npm install
+      - run: npm run build
+      - name: deploy
+        id: deployment
+        uses: actions/deploy-pages@v1

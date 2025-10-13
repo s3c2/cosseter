@@ -1,0 +1,88 @@
+services: 
+  redis:
+    networks:
+      - cosseterCom
+    image: redis:latest
+    deploy:
+      resources:
+        limits:
+          memory: 5G
+    attach: false
+    ports:
+      - 127.0.0.1:6379:6379
+
+  mongo-server:
+    image: mongo:latest
+    ports:
+      - 127.0.0.1:27017:27017
+    networks:
+      - cosseterCom
+    attach: false
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 10G
+    configs:
+      - source: mongo-config
+        target: /etc/mongod.conf
+    volumes:
+      - ./mongoData/db:/data/db
+
+  workflow-frontend:
+    build: ./WorkflowFrontend/
+    depends_on:
+      - mongo-server
+      - redis
+    networks:
+      - cosseterCom
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    volumes:
+      - ./sharedDirectory:/app/sharedDirectory
+# Not completed
+  action-analyzer:
+    build: ./ActionAnalyzer/
+    depends_on:
+      - workflow-frontend
+    networks:
+      - cosseterCom
+    deploy:
+      resources:
+        limits:
+          memory: 180G
+    attach: false
+    volumes:
+      - ./sharedDirectory:/app/sharedDirectory
+    environment:
+      - CELERY_RESULT_BACKEND=mongodb://mongo-server:27017
+
+  bash-analyzer:
+    build: ./BashAnalyzer/
+    depends_on:
+      - workflow-frontend
+    networks:
+      - cosseterCom
+    deploy:
+      resources:
+        limits:
+          memory: 100G
+    attach: false
+    volumes:
+      - ./BashAnalyzer/:/BashAnalyzer/
+    environment:
+      - CELERY_BROKER=redis://redis:6379/10
+      - CELERY_BACKEND=mongodb://mongo-server:27017/BashCeleryBackend
+
+networks:
+  hostnet:
+    external: true
+    name: host
+  cosseterCom:
+    driver: bridge
+
+configs:
+  mongo-config:
+    file: ./mongoConf/mongod.conf

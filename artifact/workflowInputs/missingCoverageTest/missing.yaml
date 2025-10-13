@@ -1,0 +1,29 @@
+name: Run Script in Docker
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read  # needed for actions/checkout
+
+jobs:
+  run-in-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run private image command(s)
+        uses: addnab/docker-run-action@v3
+        with:
+          image: private-image:latest
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          # Mount the repo into the container at /work
+          options: -v ${{ github.workspace }}:/work
+          run: |
+            echo "Running Script"
+            /work/run-script

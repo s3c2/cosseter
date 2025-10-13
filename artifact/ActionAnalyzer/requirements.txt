@@ -1,0 +1,10 @@
+pymongo==4.10.1
+celery==5.4.0
+redis
+pyyaml
+psutil
+func_timeout
+networkx
+sty
+z3-solver
+tqdm

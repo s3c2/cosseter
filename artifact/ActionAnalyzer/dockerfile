@@ -1,0 +1,22 @@
+FROM nikolaik/python-nodejs:python3.11-nodejs18
+
+
+COPY ./celeryApp/ /app/celeryApp/
+COPY ./celeryApp/dockerConfig/celeryconfig.py /app/celeryApp/celeryconfig.py
+RUN mv /app/celeryApp/funcsToMethods /app/funcsToMethods && mv /app/celeryApp/methodsNew /app/methodsNew && mv /app/celeryApp/regexSetUpdated /app/regexSetUpdated
+RUN mv /app/celeryApp/runAnalysis.py /app/runAnalysis.py
+COPY ./CosseterJavaScript/ /app/CosseterJavaScript
+
+WORKDIR /app/CosseterJavaScript/esprima-csv/
+RUN npm install
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir -r ./celeryApp/requirements.txt
+RUN pip install --no-cache-dir -r ./CosseterJavaScript/requirements.txt
+# Ran into issues with newer pymongo so have to downgrade
+RUN pip uninstall -y pymongo
+RUN pip install pymongo==4.10.1
+
+EXPOSE 50000
+CMD ["celery", "-A", "celeryApp.worker", "worker", "--loglevel=INFO", "--autoscale=20", "--concurrency=20", "--max-tasks-per-child=1"]

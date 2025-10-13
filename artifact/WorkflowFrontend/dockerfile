@@ -1,0 +1,33 @@
+# Use the official Python image from the Docker Hub
+FROM python:3.11-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements file and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the wfanalyze package
+COPY wfanalyze/ ./wfanalyze/
+
+# Copy the workflow processor script
+COPY workflow_processor.py .
+RUN chmod +x workflow_processor.py
+
+# Create volume mount points
+VOLUME ["/app/sharedDirectory"]
+
+# Set environment variables
+ENV MONGODB_URI=mongodb://mongo-server:27017 
+ENV MONGODB_DB=workflow_analysis
+ENV WORKFLOWS_DIR=/app/sharedDirectory/workflows
+ENV CONFIGS_DIR=/app/sharedDirectory/configs
+
+# Set the default command to run our workflow processor
+CMD ["python", "workflow_processor.py"]

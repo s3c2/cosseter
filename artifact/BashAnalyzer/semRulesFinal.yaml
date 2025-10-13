@@ -1,0 +1,4258 @@
+rules:
+- id: find-var-vals
+  pattern-regex: "# GREG_JONAH_LOOK_HERE: (.+?)$"
+  message: |
+    Found git command: [$1]
+  languages:
+    - bash
+  severity: INFO
+
+- id: git-command-extraction
+  pattern-either:
+    - patterns:
+      - pattern-either:
+        - pattern: git $COM ...
+        - patterns: 
+          - pattern: git $COM ... $SEC ...
+          - metavariable-pattern:
+              metavariable: $SEC
+              patterns:
+                - pattern-not-regex: ^(-|--)[a-zA-Z]
+        - patterns: 
+          - pattern: git $COM ... $FLAG $VAL ...
+          - metavariable-pattern:
+              metavariable: $FLAG
+              patterns:
+                - pattern-not-regex: ^(-|--)[a-zA-Z-]+=
+                - pattern-regex: ^(-|--)[a-zA-Z]
+        - patterns: 
+          - pattern: git $COM ... $SEC ... $FLAG $VAL ...
+          - metavariable-pattern:
+              metavariable: $FLAG
+              patterns:
+                - pattern-not-regex: ^(-|--)[a-zA-Z-]+=
+                - pattern-regex: ^(-|--)[a-zA-Z]
+          - metavariable-pattern:
+              metavariable: $SEC
+              patterns:
+                - pattern-not-regex: ^(-|--)[a-zA-Z]
+        - patterns:
+          - pattern: git $COM ... $FEQVAL ...
+          - metavariable-pattern:
+              metavariable: $FEQVAL
+              pattern-regex: ^(-|--)[a-zA-Z-]+=
+      - metavariable-pattern:
+          metavariable: $COM
+          patterns:
+            - pattern-not-regex: ^(-|--)[a-zA-Z]
+
+  message: |
+    Found git command with: [$FLAG] [$VAL] [$COM] [$SEC] [$FEQVAL]
+  languages:
+    - bash
+  severity: INFO
+
+- id: wget-url-extraction
+  pattern-either:
+    - patterns:
+      - pattern: wget ... $POT $URL ...
+      - metavariable-pattern:
+          metavariable: $POT
+          patterns:
+            - pattern-regex: (^(-|--)[a-zA-Z-]+=)|.*?
+            - pattern-not-regex: ^(-|--)[a-zA-Z]
+      - metavariable-pattern:
+          metavariable: $URL
+          patterns:
+            - pattern-not-regex: ^(-|--)[a-zA-Z]
+    - patterns:
+      - pattern: wget $URL ...
+      - metavariable-pattern:
+          metavariable: $URL
+          patterns:
+            - pattern-not-regex: ^(-|--)[a-zA-Z]
+    - patterns:
+      - pattern: wget ... $FLAG $VAL ...
+      - metavariable-pattern:
+          metavariable: $FLAG
+          patterns:
+            - pattern-not-regex: ^(-|--)[a-zA-Z-]+=
+            - pattern-regex: ^(-|--)[a-zA-Z]
+    - patterns:
+      - pattern: wget ... $FEQVAL ...
+      - metavariable-pattern:
+          metavariable: $FEQVAL
+          pattern-regex: ^(-|--)[a-zA-Z-]+=
+  
+  message: |
+    Found wget command with URL|||$POT|||$URL|||$FLAG|||$VAL|||$FEQVAL
+  languages:
+    - bash
+  severity: INFO
+
+- id: curl-url-extraction
+  pattern-either:
+    - patterns:
+      - pattern: curl ... $POT $URL ...
+      - metavariable-pattern:
+          metavariable: $POT
+          patterns:
+            - pattern-regex: (^(-|--)[a-zA-Z-]+=)|.*?
+            - pattern-not-regex: ^(-|--)[a-zA-Z]
+      - metavariable-pattern:
+          metavariable: $URL
+          patterns:
+            - pattern-not-regex: ^(-|--)[a-zA-Z]
+    - patterns:
+      - pattern: curl $URL ...
+      - metavariable-pattern:
+          metavariable: $URL
+          patterns:
+            - pattern-not-regex: ^(-|--)[a-zA-Z]
+    - patterns:
+      - pattern: curl ... $FLAG $VAL ...
+      - metavariable-pattern:
+          metavariable: $FLAG
+          patterns:
+            - pattern-not-regex: ^(-|--)[a-zA-Z-]+=
+            - pattern-regex: ^(-|--)[a-zA-Z]
+    - patterns:
+      - pattern: curl ... $FEQVAL ...
+      - metavariable-pattern:
+          metavariable: $FEQVAL
+          pattern-regex: ^(-|--)[a-zA-Z-]+=
+
+  message: |
+    Found curl command with URL|||$POT|||$URL|||$FLAG|||$VAL|||$FEQVAL
+  languages:
+    - bash
+  severity: INFO
+
+- id: gh-url-extraction
+  pattern-either:
+    - patterns:
+      - pattern: gh api ... $POT $URL ...
+      - metavariable-pattern:
+          metavariable: $POT
+          patterns:
+            - pattern-regex: (^(-|--)[a-zA-Z-]+=)|.*?
+            - pattern-not-regex: ^(-|--)[a-zA-Z]
+      - metavariable-pattern:
+          metavariable: $URL
+          patterns:
+            - pattern-not-regex: ^(-|--)[a-zA-Z]
+    - patterns:
+      - pattern: gh api $URL ...
+      - metavariable-pattern:
+          metavariable: $URL
+          patterns:
+            - pattern-not-regex: ^(-|--)[a-zA-Z]
+    - patterns:
+      - pattern: gh api ... $FLAG $VAL ...
+      - metavariable-pattern:
+          metavariable: $FLAG
+          pattern-either:
+            - pattern: -X
+            - pattern: --Request
+            - pattern: --url
+    - patterns:
+      - pattern: gh api ... $FEQVAL ...
+      - metavariable-pattern:
+          metavariable: $FEQVAL
+          pattern-regex: ^(-|--)[a-zA-Z-]+=
+    - patterns:
+      - pattern-either:
+        - pattern: gh $COM ...
+        - patterns: 
+          - pattern: gh $COM ... $SEC ...
+          - metavariable-pattern:
+              metavariable: $SEC
+              patterns:
+                - pattern-not-regex: ^(-|--)[a-zA-Z]
+                - pattern-not: api
+        - patterns: 
+          - pattern: gh $COM ... $FLAG $VAL ...
+          - metavariable-pattern:
+              metavariable: $FLAG
+              patterns:
+                - pattern-not-regex: ^(-|--)[a-zA-Z-]+=
+                - pattern-regex: ^(-|--)[a-zA-Z]
+        - patterns:
+          - pattern: gh $COM ... $FEQVAL ...
+          - metavariable-pattern:
+              metavariable: $FEQVAL
+              pattern-regex: ^(-|--)[a-zA-Z-]+=
+        - patterns: 
+          - pattern: gh $COM ... $SEC ... $FLAG $VAL ...
+          - metavariable-pattern:
+              metavariable: $FLAG
+              patterns:
+                - pattern-not-regex: ^(-|--)[a-zA-Z-]+=
+                - pattern-regex: ^(-|--)[a-zA-Z]
+          - metavariable-pattern:
+              metavariable: $SEC
+              patterns:
+                - pattern-not-regex: ^(-|--)[a-zA-Z]
+                - pattern-not: api
+        - patterns:
+          - pattern: gh $COM ... $SEC ... $FEQVAL ...
+          - metavariable-pattern:
+              metavariable: $FEQVAL
+              pattern-regex: ^(-|--)[a-zA-Z-]+=
+      - metavariable-pattern:
+          metavariable: $COM
+          patterns:
+            - pattern-not-regex: ^(-|--)[a-zA-Z]
+            - pattern-not: api
+
+  message: |
+    Found gh command with URL:|||$POT|||$URL|||$FLAG|||$VAL|||$COM|||$SEC||$FEQVAL
+  languages:
+    - bash
+  severity: INFO
+
+- id: find-routes-0
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/runners\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/actions\/runners\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-1
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/deployments\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/deployments\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-2
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/stats\/punch_card($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/stats\/punch_card($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-3
+  patterns:
+    - pattern-regex: (\/?projects\/columns\/cards\/([^\/]+)?\/moves($|"|'|\s))
+  message: \/?projects\/columns\/cards\/([^\/]+)?\/moves($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-4
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/blocks\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/blocks\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-5
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/labels($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/labels($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-6
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pages($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pages($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-7
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/dependabot\/secrets($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/dependabot\/secrets($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-8
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/security-managers\/teams\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/security-managers\/teams\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-9
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/versions\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/versions\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-10
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/codespaces\/secrets\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/codespaces\/secrets\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-11
+  patterns:
+    - pattern-regex: (\/?user\/migrations($|"|'|\s))
+  message: \/?user\/migrations($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-12
+  patterns:
+    - pattern-regex: (\/?user\/interaction-limits($|"|'|\s))
+  message: \/?user\/interaction-limits($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-13
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/memberships\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/memberships\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-14
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/permissions\/workflow($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/permissions\/workflow($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-15
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/tags\/protection($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/tags\/protection($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-16
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/properties\/schema\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/properties\/schema\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-17
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/comments\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/comments\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-18
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/timing($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/timing($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-19
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/merge($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/merge($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-20
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/secrets\/public-key($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/secrets\/public-key($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-21
+  patterns:
+    - pattern-regex: (\/?search\/repositories($|"|'|\s))
+  message: \/?search\/repositories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-22
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/pending_deployments($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/pending_deployments($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-23
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/import\/large_files($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/import\/large_files($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-24
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/comments\/([^\/]+)?\/reactions($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/comments\/([^\/]+)?\/reactions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-25
+  patterns:
+    - pattern-regex: (\/?user\/installations($|"|'|\s))
+  message: \/?user\/installations($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-26
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/comments\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/comments\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-27
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/projects\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/projects\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-28
+  patterns:
+    - pattern-regex: (\/?user\/ssh_signing_keys($|"|'|\s))
+  message: \/?user\/ssh_signing_keys($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-29
+  patterns:
+    - pattern-regex: (\/?user\/following($|"|'|\s))
+  message: \/?user\/following($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-30
+  patterns:
+    - pattern-regex: (\/?app\/installations\/([^\/]+)?\/suspended($|"|'|\s))
+  message: \/?app\/installations\/([^\/]+)?\/suspended($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-31
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/refs\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/refs\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-32
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/issues($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/issues($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-33
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/secrets\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/actions\/secrets\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-34
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/runners\/generate-jitconfig($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/runners\/generate-jitconfig($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-35
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/hooks\/([^\/]+)?\/deliveries($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/hooks\/([^\/]+)?\/deliveries($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-36
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/runners\/([^\/]+)?\/labels($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/runners\/([^\/]+)?\/labels($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-37
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/variables\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/actions\/variables\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-38
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/autolinks\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/autolinks\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-39
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/rulesets($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/rulesets($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-40
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/traffic\/popular\/referrers($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/traffic\/popular\/referrers($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-41
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/([^\/]+)?\/statuses($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/([^\/]+)?\/statuses($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-42
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/check-suites\/preferences($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/check-suites\/preferences($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-43
+  patterns:
+    - pattern-regex: (\/?orgs\/[^\/\s'"$]+)
+  message: \/?orgs\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-44
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/secrets\/public-key($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/secrets\/public-key($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-45
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-46
+  patterns:
+    - pattern-regex: (\/?user\/installations\/([^\/]+)?\/repositories\/[^\/\s'"$]+)
+  message: \/?user\/installations\/([^\/]+)?\/repositories\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-47
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/invitations\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/invitations\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-48
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/projects($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/projects($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-49
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/rename($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/rename($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-50
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/reviews\/([^\/]+)?\/dismissals($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/reviews\/([^\/]+)?\/dismissals($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-51
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/contents\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/contents\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-52
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/vulnerability-alerts($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/vulnerability-alerts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-53
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/dependabot\/secrets($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/dependabot\/secrets($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-54
+  patterns:
+    - pattern-regex: (\/?user\/packages\/([^\/]+)?\/?([^\/]+)?\/versions\/[^\/\s'"$]+)
+  message: \/?user\/packages\/([^\/]+)?\/?([^\/]+)?\/versions\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-55
+  patterns:
+    - pattern-regex: (\/?user\/packages\/([^\/]+)?\/?[^\/\s'"$]+)
+  message: \/?user\/packages\/([^\/]+)?\/?[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-56
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/events($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/events($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-57
+  patterns:
+    - pattern-regex: (\/?gists\/([^\/]+)?\/star($|"|'|\s))
+  message: \/?gists\/([^\/]+)?\/star($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-58
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/assignees\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/assignees\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-59
+  patterns:
+    - pattern-regex: (\/?user\/codespaces\/secrets\/([^\/]+)?\/repositories($|"|'|\s))
+  message: \/?user\/codespaces\/secrets\/([^\/]+)?\/repositories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-60
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-61
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/copilot\/billing\/selected_users($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/copilot\/billing\/selected_users($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-62
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/stats\/code_frequency($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/stats\/code_frequency($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-63
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/following\/[^\/\s'"$]+)
+  message: \/?users\/([^\/]+)?\/following\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-64
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/repos\/([^\/]+)?\/?[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/repos\/([^\/]+)?\/?[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-65
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks\/([^\/]+)?\/tests($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks\/([^\/]+)?\/tests($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-66
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/secrets\/([^\/]+)?\/repositories($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/secrets\/([^\/]+)?\/repositories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-67
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/codespaces\/secrets\/([^\/]+)?\/repositories\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/codespaces\/secrets\/([^\/]+)?\/repositories\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-68
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/organization-variables($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/organization-variables($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-69
+  patterns:
+    - pattern-regex: (\/?search\/topics($|"|'|\s))
+  message: \/?search\/topics($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-70
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-71
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/stats\/commit_activity($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/stats\/commit_activity($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-72
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-73
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/packages\/([^\/]+)?\/?[^\/\s'"$]+)
+  message: \/?users\/([^\/]+)?\/packages\/([^\/]+)?\/?[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-74
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/required_status_checks($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/required_status_checks($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-75
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/migrations\/([^\/]+)?\/archive($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/migrations\/([^\/]+)?\/archive($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-76
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pages\/builds\/latest($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pages\/builds\/latest($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-77
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/ref\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/ref\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-78
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/permissions\/workflow($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/permissions\/workflow($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-79
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/reviews\/([^\/]+)?\/comments($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/reviews\/([^\/]+)?\/comments($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-80
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/comments($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/comments($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-81
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/permissions\/selected-actions($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/permissions\/selected-actions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-82
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/([^\/]+)?\/reactions\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/([^\/]+)?\/reactions\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-83
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/restrictions\/users($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/restrictions\/users($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-84
+  patterns:
+    - pattern-regex: (\/?zen($|"|'|\s))
+  message: \/?zen($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-85
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/keys($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/keys($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-86
+  patterns:
+    - pattern-regex: (\/?advisories\/[^\/\s'"$]+)
+  message: \/?advisories\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-87
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/gpg_keys($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/gpg_keys($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-88
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-89
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/dependabot\/alerts($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/dependabot\/alerts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-90
+  patterns:
+    - pattern-regex: (\/?user\/repos($|"|'|\s))
+  message: \/?user\/repos($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-91
+  patterns:
+    - pattern-regex: (\/?applications\/([^\/]+)?\/token($|"|'|\s))
+  message: \/?applications\/([^\/]+)?\/token($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-92
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/collaborators\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/collaborators\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-93
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/automated-security-fixes($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/automated-security-fixes($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-94
+  patterns:
+    - pattern-regex: (\/?app\/hook\/deliveries\/([^\/]+)?\/attempts($|"|'|\s))
+  message: \/?app\/hook\/deliveries\/([^\/]+)?\/attempts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-95
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/([^\/]+)?\/check-suites($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/([^\/]+)?\/check-suites($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-96
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/variables($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/variables($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-97
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/commits($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/commits($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-98
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/caches\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/caches\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-99
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/workflows\/([^\/]+)?\/runs($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/workflows\/([^\/]+)?\/runs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-100
+  patterns:
+    - pattern-regex: (\/?markdown\/raw($|"|'|\s))
+  message: \/?markdown\/raw($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-101
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces\/secrets\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces\/secrets\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-102
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/security-advisories\/reports($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/security-advisories\/reports($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-103
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/([^\/]+)?\/branches-where-head($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/([^\/]+)?\/branches-where-head($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-104
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-105
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/copilot\/billing\/selected_teams($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/copilot\/billing\/selected_teams($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-106
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/jobs\/([^\/]+)?\/rerun($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/jobs\/([^\/]+)?\/rerun($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-107
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/codeowners\/errors($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/codeowners\/errors($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-108
+  patterns:
+    - pattern-regex: (\/?projects\/([^\/]+)?\/collaborators($|"|'|\s))
+  message: \/?projects\/([^\/]+)?\/collaborators($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-109
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/interaction-limits($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/interaction-limits($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-110
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/merge-upstream($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/merge-upstream($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-111
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/assignees\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/assignees\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-112
+  patterns:
+    - pattern-regex: (\/?gists\/([^\/]+)?\/comments\/[^\/\s'"$]+)
+  message: \/?gists\/([^\/]+)?\/comments\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-113
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/installations($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/installations($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-114
+  patterns:
+    - pattern-regex: (\/?user\/starred($|"|'|\s))
+  message: \/?user\/starred($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-115
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/releases($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/releases($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-116
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/assignees($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/assignees($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-117
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/restrictions($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/restrictions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-118
+  patterns:
+    - pattern-regex: (\/?user\/codespaces\/([^\/]+)?\/stop($|"|'|\s))
+  message: \/?user\/codespaces\/([^\/]+)?\/stop($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-119
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/rulesets\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/rulesets\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-120
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/dependabot\/alerts($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/dependabot\/alerts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-121
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/labels\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/labels\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-122
+  patterns:
+    - pattern-regex: (\/?user\/memberships\/orgs\/[^\/\s'"$]+)
+  message: \/?user\/memberships\/orgs\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-123
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/variables\/([^\/]+)?\/repositories\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/actions\/variables\/([^\/]+)?\/repositories\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-124
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/restrictions\/apps($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/restrictions\/apps($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-125
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/milestones\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/milestones\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-126
+  patterns:
+    - pattern-regex: (\/?user\/ssh_signing_keys\/[^\/\s'"$]+)
+  message: \/?user\/ssh_signing_keys\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-127
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/dependabot\/secrets\/([^\/]+)?\/repositories\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/dependabot\/secrets\/([^\/]+)?\/repositories\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-128
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/members\/([^\/]+)?\/codespaces\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/members\/([^\/]+)?\/codespaces\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-129
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pages\/builds($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pages\/builds($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-130
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/environments\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/environments\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-131
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/license($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/license($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-132
+  patterns:
+    - pattern-regex: (\/?user\/orgs($|"|'|\s))
+  message: \/?user\/orgs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-133
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/rulesets\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/rulesets\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-134
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pages\/builds\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pages\/builds\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-135
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/following($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/following($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-136
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/tags\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/tags\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-137
+  patterns:
+    - pattern-regex: (\/?user\/codespaces\/([^\/]+)?\/exports($|"|'|\s))
+  message: \/?user\/codespaces\/([^\/]+)?\/exports($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-138
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/secrets\/([^\/]+)?\/repositories\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/actions\/secrets\/([^\/]+)?\/repositories\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-139
+  patterns:
+    - pattern-regex: (\/?projects\/columns\/([^\/]+)?\/cards($|"|'|\s))
+  message: \/?projects\/columns\/([^\/]+)?\/cards($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-140
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/received_events($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/received_events($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-141
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/readme\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/readme\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-142
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/security-advisories\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/security-advisories\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-143
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/lock($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/lock($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-144
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/starred($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/starred($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-145
+  patterns:
+    - pattern-regex: (\/?user\/packages\/([^\/]+)?\/?([^\/]+)?\/versions($|"|'|\s))
+  message: \/?user\/packages\/([^\/]+)?\/?([^\/]+)?\/versions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-146
+  patterns:
+    - pattern-regex: (\/?user\/keys($|"|'|\s))
+  message: \/?user\/keys($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-147
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/comments\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/comments\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-148
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/milestones($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/milestones($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-149
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-150
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/public_members\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/public_members\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-151
+  patterns:
+    - pattern-regex: (\/?projects\/([^\/]+)?\/columns($|"|'|\s))
+  message: \/?projects\/([^\/]+)?\/columns($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-152
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-153
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/tags\/protection\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/tags\/protection\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-154
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/([^\/]+)?\/pulls($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/([^\/]+)?\/pulls($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-155
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/deployments\/([^\/]+)?\/statuses($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/deployments\/([^\/]+)?\/statuses($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-156
+  patterns:
+    - pattern-regex: (\/?repositories\/([^\/]+)?\/environments\/([^\/]+)?\/variables($|"|'|\s))
+  message: \/?repositories\/([^\/]+)?\/environments\/([^\/]+)?\/variables($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-157
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners\/([^\/]+)?\/labels($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners\/([^\/]+)?\/labels($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-158
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/import\/authors($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/import\/authors($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-159
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/enforce_admins($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/enforce_admins($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-160
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/cache\/usage-by-repository($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/cache\/usage-by-repository($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-161
+  patterns:
+    - pattern-regex: (\/?repositories\/([^\/]+)?\/environments\/([^\/]+)?\/secrets\/[^\/\s'"$]+)
+  message: \/?repositories\/([^\/]+)?\/environments\/([^\/]+)?\/secrets\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-162
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-163
+  patterns:
+    - pattern-regex: (\/?projects\/([^\/]+)?\/collaborators\/[^\/\s'"$]+)
+  message: \/?projects\/([^\/]+)?\/collaborators\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-164
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/comments\/([^\/]+)?\/reactions($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/comments\/([^\/]+)?\/reactions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-165
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/environments($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/environments($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-166
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/events($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/events($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-167
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/rulesets($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/rulesets($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-168
+  patterns:
+    - pattern-regex: (\/?user\/codespaces\/([^\/]+)?\/exports\/[^\/\s'"$]+)
+  message: \/?user\/codespaces\/([^\/]+)?\/exports\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-169
+  patterns:
+    - pattern-regex: (\/?organizations($|"|'|\s))
+  message: \/?organizations($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-170
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/alerts\/([^\/]+)?\/instances($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/alerts\/([^\/]+)?\/instances($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-171
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/hooks($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/hooks($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-172
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/rerun-failed-jobs($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/rerun-failed-jobs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-173
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/traffic\/views($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/traffic\/views($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-174
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/variables\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/variables\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-175
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/oidc\/customization\/sub($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/oidc\/customization\/sub($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-176
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/commits\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/commits\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-177
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/environments\/([^\/]+)?\/deployment-branch-policies($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/environments\/([^\/]+)?\/deployment-branch-policies($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-178
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/events\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/events\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-179
+  patterns:
+    - pattern-regex: (\/?networks\/([^\/]+)?\/?([^\/]+)?\/events($|"|'|\s))
+  message: \/?networks\/([^\/]+)?\/?([^\/]+)?\/events($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-180
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/properties\/values($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/properties\/values($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-181
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/personal-access-tokens($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/personal-access-tokens($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-182
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-183
+  patterns:
+    - pattern-regex: (\/?notifications($|"|'|\s))
+  message: \/?notifications($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-184
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/check-runs($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/check-runs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-185
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/reviews\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/reviews\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-186
+  patterns:
+    - pattern-regex: (\/?user\/packages($|"|'|\s))
+  message: \/?user\/packages($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-187
+  patterns:
+    - pattern-regex: (\/?app\/hook\/deliveries($|"|'|\s))
+  message: \/?app\/hook\/deliveries($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-188
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/comments\/([^\/]+)?\/reactions\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/comments\/([^\/]+)?\/reactions\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-189
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-190
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-191
+  patterns:
+    - pattern-regex: (\/?user\/marketplace_purchases\/stubbed($|"|'|\s))
+  message: \/?user\/marketplace_purchases\/stubbed($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-192
+  patterns:
+    - pattern-regex: (\/?marketplace_listing\/stubbed\/accounts\/[^\/\s'"$]+)
+  message: \/?marketplace_listing\/stubbed\/accounts\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-193
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/labels($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/labels($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-194
+  patterns:
+    - pattern-regex: (\/?notifications\/threads\/([^\/]+)?\/subscription($|"|'|\s))
+  message: \/?notifications\/threads\/([^\/]+)?\/subscription($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-195
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/requested_reviewers($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/requested_reviewers($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-196
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/restrictions\/teams($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/restrictions\/teams($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-197
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/variables($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/variables($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-198
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/comments\/([^\/]+)?\/reactions($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/comments\/([^\/]+)?\/reactions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-199
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/approvals($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/approvals($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-200
+  patterns:
+    - pattern-regex: (\/?user\/emails($|"|'|\s))
+  message: \/?user\/emails($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-201
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/check-runs\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/check-runs\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-202
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-203
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/comments($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/comments($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-204
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/required_signatures($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/required_signatures($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-205
+  patterns:
+    - pattern-regex: (\/?projects\/columns\/[^\/\s'"$]+)
+  message: \/?projects\/columns\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-206
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/codeql\/databases($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/codeql\/databases($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-207
+  patterns:
+    - pattern-regex: (\/?gists\/([^\/]+)?\/?[^\/\s'"$]+)
+  message: \/?gists\/([^\/]+)?\/?[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-208
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/repos($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/repos($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-209
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/invitations($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/invitations($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-210
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/latest($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/latest($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-211
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/comments($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/comments($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-212
+  patterns:
+    - pattern-regex: (\/?user\/marketplace_purchases($|"|'|\s))
+  message: \/?user\/marketplace_purchases($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-213
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/dependabot\/secrets\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/dependabot\/secrets\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-214
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/interaction-limits($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/interaction-limits($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-215
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/outside_collaborators($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/outside_collaborators($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-216
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/dependabot\/secrets\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/dependabot\/secrets\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-217
+  patterns:
+    - pattern-regex: (\/?user\/docker\/conflicts($|"|'|\s))
+  message: \/?user\/docker\/conflicts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-218
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-219
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/security-advisories\/([^\/]+)?\/cve($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/security-advisories\/([^\/]+)?\/cve($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-220
+  patterns:
+    - pattern-regex: (\/?users($|"|'|\s))
+  message: \/?users($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-221
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/caches[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/caches[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-222
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/refs($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/refs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-223
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/required_status_checks\/contexts($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/required_status_checks\/contexts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-224
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/alerts\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/alerts\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-225
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/permissions($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/permissions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-226
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/reviews($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/reviews($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-227
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-228
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/subscription($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/subscription($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-229
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/hooks\/([^\/]+)?\/pings($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/hooks\/([^\/]+)?\/pings($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-230
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/restore[^\/\s'"$]+)
+  message: \/?users\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/restore[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-231
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/rulesets\/rule-suites($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/rulesets\/rule-suites($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-232
+  patterns:
+    - pattern-regex: (\/?user\/blocks\/[^\/\s'"$]+)
+  message: \/?user\/blocks\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-233
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/properties\/schema($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/properties\/schema($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-234
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/permissions\/access($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/permissions\/access($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-235
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/caches($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/caches($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-236
+  patterns:
+    - pattern-regex: (\/?app($|"|'|\s))
+  message: \/?app($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-237
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/hooks\/([^\/]+)?\/deliveries\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/hooks\/([^\/]+)?\/deliveries\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-238
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/([^\/]+)?\/check-runs($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/([^\/]+)?\/check-runs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-239
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/dependency-graph\/compare\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/dependency-graph\/compare\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-240
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/artifacts\/([^\/]+)?\/?[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/artifacts\/([^\/]+)?\/?[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-241
+  patterns:
+    - pattern-regex: (\/?codes_of_conduct\/[^\/\s'"$]+)
+  message: \/?codes_of_conduct\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-242
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces\/permissions_check($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces\/permissions_check($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-243
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/hooks\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/hooks\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-244
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/analyses\/([^\/]+)?[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/analyses\/([^\/]+)?[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-245
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/security-advisories($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/security-advisories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-246
+  patterns:
+    - pattern-regex: (\/?user\/starred\/([^\/]+)?\/?[^\/\s'"$]+)
+  message: \/?user\/starred\/([^\/]+)?\/?[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-247
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/installation($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/installation($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-248
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/check-suites\/([^\/]+)?\/rerequest($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/check-suites\/([^\/]+)?\/rerequest($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-249
+  patterns:
+    - pattern-regex: (\/?notifications\/threads\/[^\/\s'"$]+)
+  message: \/?notifications\/threads\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-250
+  patterns:
+    - pattern-regex: (\/?user\/gpg_keys\/[^\/\s'"$]+)
+  message: \/?user\/gpg_keys\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-251
+  patterns:
+    - pattern-regex: (\/?app-manifests\/([^\/]+)?\/conversions($|"|'|\s))
+  message: \/?app-manifests\/([^\/]+)?\/conversions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-252
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/codespaces($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/codespaces($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-253
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/docker\/conflicts($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/docker\/conflicts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-254
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners\/generate-jitconfig($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners\/generate-jitconfig($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-255
+  patterns:
+    - pattern-regex: (\/?applications\/([^\/]+)?\/grant($|"|'|\s))
+  message: \/?applications\/([^\/]+)?\/grant($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-256
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/security-managers($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/security-managers($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-257
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/alerts($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/alerts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-258
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/environments\/([^\/]+)?\/deployment_protection_rules($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/environments\/([^\/]+)?\/deployment_protection_rules($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-259
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/secrets\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/secrets\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-260
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners\/remove-token($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners\/remove-token($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-261
+  patterns:
+    - pattern-regex: (\/?user\/packages\/([^\/]+)?\/?([^\/]+)?\/versions\/([^\/]+)?\/restore($|"|'|\s))
+  message: \/?user\/packages\/([^\/]+)?\/?([^\/]+)?\/versions\/([^\/]+)?\/restore($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-262
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/jobs($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/jobs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-263
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/comments\/([^\/]+)?\/replies($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/comments\/([^\/]+)?\/replies($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-264
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/community\/profile($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/community\/profile($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-265
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/required_pull_request_reviews($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/([^\/]+)?\/protection\/required_pull_request_reviews($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-266
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/runners\/downloads($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/runners\/downloads($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-267
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners\/downloads($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners\/downloads($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-268
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/repos($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/repos($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-269
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/events($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/events($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-270
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks\/([^\/]+)?\/pings($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks\/([^\/]+)?\/pings($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-271
+  patterns:
+    - pattern-regex: (\/?emojis($|"|'|\s))
+  message: \/?emojis($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-272
+  patterns:
+    - pattern-regex: (\/?projects\/[^\/\s'"$]+)
+  message: \/?projects\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-273
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/runners\/([^\/]+)?\/labels\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/actions\/runners\/([^\/]+)?\/labels\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-274
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/hovercard($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/hovercard($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-275
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/environments\/([^\/]+)?\/deployment_protection_rules\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/environments\/([^\/]+)?\/deployment_protection_rules\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-276
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/memberships\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/memberships\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-277
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pages\/deployment($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pages\/deployment($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-278
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/generate($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/generate($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-279
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/comments\/([^\/]+)?\/reactions\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/comments\/([^\/]+)?\/reactions\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-280
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/code-scanning\/alerts($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/code-scanning\/alerts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-281
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/migrations($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/migrations($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-282
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/reactions($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/reactions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-283
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions\/([^\/]+)?\/comments($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions\/([^\/]+)?\/comments($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-284
+  patterns:
+    - pattern-regex: (\/?users\/[^\/\s'"$]+)
+  message: \/?users\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-285
+  patterns:
+    - pattern-regex: (\/?repositories\/([^\/]+)?\/environments\/([^\/]+)?\/variables\/[^\/\s'"$]+)
+  message: \/?repositories\/([^\/]+)?\/environments\/([^\/]+)?\/variables\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-286
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/environments\/([^\/]+)?\/deployment-branch-policies\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/environments\/([^\/]+)?\/deployment-branch-policies\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-287
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/check-suites\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/check-suites\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-288
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/logs($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/logs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-289
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/check-suites\/([^\/]+)?\/check-runs($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/check-suites\/([^\/]+)?\/check-runs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-290
+  patterns:
+    - pattern-regex: (\/?user\/codespaces\/[^\/\s'"$]+)
+  message: \/?user\/codespaces\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-291
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/artifacts\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/artifacts\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-292
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/variables\/([^\/]+)?\/repositories($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/variables\/([^\/]+)?\/repositories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-293
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/zipball\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/zipball\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-294
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/security-advisories($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/security-advisories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-295
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/secret-scanning\/alerts($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/secret-scanning\/alerts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-296
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/cancel($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/cancel($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-297
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/artifacts($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/artifacts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-298
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/settings\/billing\/shared-storage($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/settings\/billing\/shared-storage($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-299
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/activity($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/activity($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-300
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/codespaces($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/codespaces($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-301
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks\/([^\/]+)?\/config($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks\/([^\/]+)?\/config($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-302
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/rerun($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/rerun($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-303
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/dependabot\/secrets\/public-key($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/dependabot\/secrets\/public-key($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-304
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/commits($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/commits($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-305
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/workflows\/([^\/]+)?\/disable($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/workflows\/([^\/]+)?\/disable($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-306
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/rulesets\/rule-suites\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/rulesets\/rule-suites\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-307
+  patterns:
+    - pattern-regex: (\/?user\/blocks($|"|'|\s))
+  message: \/?user\/blocks($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-308
+  patterns:
+    - pattern-regex: (\/?app\/installations\/([^\/]+)?\/access_tokens($|"|'|\s))
+  message: \/?app\/installations\/([^\/]+)?\/access_tokens($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-309
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/permissions\/repositories($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/permissions\/repositories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-310
+  patterns:
+    - pattern-regex: (\/?meta($|"|'|\s))
+  message: \/?meta($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-311
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/cache\/usage($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/cache\/usage($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-312
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/approve($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/approve($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-313
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/([^\/]+)?\/assets[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/([^\/]+)?\/assets[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-314
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions\/([^\/]+)?\/comments\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions\/([^\/]+)?\/comments\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-315
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/teams($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/teams($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-316
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/invitations\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/invitations\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-317
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/permissions\/selected-actions($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/permissions\/selected-actions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-318
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/personal-access-token-requests($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/personal-access-token-requests($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-319
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-320
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/runners\/remove-token($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/runners\/remove-token($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-321
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/reviews\/([^\/]+)?\/events($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/reviews\/([^\/]+)?\/events($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-322
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/members($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/members($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-323
+  patterns:
+    - pattern-regex: (\/?user\/following\/[^\/\s'"$]+)
+  message: \/?user\/following\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-324
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/codespaces\/secrets($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/codespaces\/secrets($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-325
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/private-vulnerability-reporting($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/private-vulnerability-reporting($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-326
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/matching-refs\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/matching-refs\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-327
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/([^\/]+)?\/reactions($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/([^\/]+)?\/reactions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-328
+  patterns:
+    - pattern-regex: (\/?app\/installations\/[^\/\s'"$]+)
+  message: \/?app\/installations\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-329
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/transfer($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/transfer($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-330
+  patterns:
+    - pattern-regex: (\/?user\/codespaces\/secrets\/[^\/\s'"$]+)
+  message: \/?user\/codespaces\/secrets\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-331
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions\/([^\/]+)?\/comments\/([^\/]+)?\/reactions\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions\/([^\/]+)?\/comments\/([^\/]+)?\/reactions\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-332
+  patterns:
+    - pattern-regex: (\/?user\/gpg_keys($|"|'|\s))
+  message: \/?user\/gpg_keys($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-333
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/packages\/([^\/]+)?\/?[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/packages\/([^\/]+)?\/?[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-334
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/languages($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/languages($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-335
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-336
+  patterns:
+    - pattern-regex: (\/?user\/keys\/[^\/\s'"$]+)
+  message: \/?user\/keys\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-337
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/stargazers($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/stargazers($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-338
+  patterns:
+    - pattern-regex: (\/?user\/social_accounts($|"|'|\s))
+  message: \/?user\/social_accounts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-339
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/packages($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/packages($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-340
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions\/([^\/]+)?\/comments\/([^\/]+)?\/reactions($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions\/([^\/]+)?\/comments\/([^\/]+)?\/reactions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-341
+  patterns:
+    - pattern-regex: (\/?applications\/([^\/]+)?\/token\/scoped($|"|'|\s))
+  message: \/?applications\/([^\/]+)?\/token\/scoped($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-342
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/labels\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/labels\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-343
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/dispatches($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/dispatches($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-344
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/generate-notes($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/generate-notes($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-345
+  patterns:
+    - pattern-regex: (\/?search\/code($|"|'|\s))
+  message: \/?search\/code($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-346
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/milestones\/([^\/]+)?\/labels($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/milestones\/([^\/]+)?\/labels($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-347
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/deployments($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/deployments($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-348
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/autolinks($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/autolinks($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-349
+  patterns:
+    - pattern-regex: (\/?search\/labels($|"|'|\s))
+  message: \/?search\/labels($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-350
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners\/registration-token($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners\/registration-token($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-351
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/cache\/usage($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/cache\/usage($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-352
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/sarifs\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/sarifs\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-353
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/([^\/]+)?\/assets($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/([^\/]+)?\/assets($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-354
+  patterns:
+    - pattern-regex: (\/?projects\/columns\/cards\/[^\/\s'"$]+)
+  message: \/?projects\/columns\/cards\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-355
+  patterns:
+    - pattern-regex: (\/?user\/teams($|"|'|\s))
+  message: \/?user\/teams($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-356
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/keys($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/keys($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-357
+  patterns:
+    - pattern-regex: (\/?issues($|"|'|\s))
+  message: \/?issues($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-358
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/personal-access-tokens\/([^\/]+)?\/repositories($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/personal-access-tokens\/([^\/]+)?\/repositories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-359
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/contributors($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/contributors($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-360
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners\/([^\/]+)?\/labels\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runners\/([^\/]+)?\/labels\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-361
+  patterns:
+    - pattern-regex: (\/?gitignore\/templates($|"|'|\s))
+  message: \/?gitignore\/templates($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-362
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/traffic\/clones($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/traffic\/clones($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-363
+  patterns:
+    - pattern-regex: (\/?marketplace_listing\/stubbed\/plans\/([^\/]+)?\/accounts($|"|'|\s))
+  message: \/?marketplace_listing\/stubbed\/plans\/([^\/]+)?\/accounts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-364
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/events($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/events($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-365
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions\/([^\/]+)?\/reactions($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions\/([^\/]+)?\/reactions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-366
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/secrets($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/secrets($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-367
+  patterns:
+    - pattern-regex: (\/?enterprises\/([^\/]+)?\/dependabot\/alerts($|"|'|\s))
+  message: \/?enterprises\/([^\/]+)?\/dependabot\/alerts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-368
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/attempts\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/attempts\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-369
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/permissions($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/permissions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-370
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/secrets($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/secrets($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-371
+  patterns:
+    - pattern-regex: (\/?gists\/public($|"|'|\s))
+  message: \/?gists\/public($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-372
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/check-runs\/([^\/]+)?\/rerequest($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/check-runs\/([^\/]+)?\/rerequest($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-373
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/comments($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/comments($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-374
+  patterns:
+    - pattern-regex: (\/?enterprises\/([^\/]+)?\/secret-scanning\/alerts($|"|'|\s))
+  message: \/?enterprises\/([^\/]+)?\/secret-scanning\/alerts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-375
+  patterns:
+    - pattern-regex: (\/?search\/users($|"|'|\s))
+  message: \/?search\/users($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-376
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/public_members($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/public_members($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-377
+  patterns:
+    - pattern-regex: (\/?user\/repository_invitations\/[^\/\s'"$]+)
+  message: \/?user\/repository_invitations\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-378
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/assets\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/assets\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-379
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/projects($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/projects($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-380
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/artifacts($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/artifacts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-381
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/dependabot\/alerts\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/dependabot\/alerts\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-382
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/teams($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-383
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/reactions\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/reactions\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-384
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/invitations($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/invitations($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-385
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/projects($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/projects($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-386
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/import($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/import($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-387
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/teams\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-388
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/notifications($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/notifications($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-389
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/check-runs\/([^\/]+)?\/annotations($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/check-runs\/([^\/]+)?\/annotations($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-390
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/versions\/([^\/]+)?\/restore($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/versions\/([^\/]+)?\/restore($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-391
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/deployments\/([^\/]+)?\/statuses\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/deployments\/([^\/]+)?\/statuses\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-392
+  patterns:
+    - pattern-regex: (\/?installation\/repositories($|"|'|\s))
+  message: \/?installation\/repositories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-393
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/permissions\/repositories\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/actions\/permissions\/repositories\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-394
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/analyses\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/analyses\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-395
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/hooks\/([^\/]+)?\/config($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/hooks\/([^\/]+)?\/config($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-396
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/followers($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/followers($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-397
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/installation($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/installation($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-398
+  patterns:
+    - pattern-regex: (\/?events($|"|'|\s))
+  message: \/?events($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-399
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces\/machines($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces\/machines($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-400
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/restore[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/restore[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-401
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/ssh_signing_keys($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/ssh_signing_keys($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-402
+  patterns:
+    - pattern-regex: (\/?user($|"|'|\s))
+  message: \/?user($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-403
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/blobs($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/blobs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-404
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/workflows($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/workflows($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-405
+  patterns:
+    - pattern-regex: (\/?gists\/([^\/]+)?\/forks($|"|'|\s))
+  message: \/?gists\/([^\/]+)?\/forks($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-406
+  patterns:
+    - pattern-regex: (\/?gists\/([^\/]+)?\/commits($|"|'|\s))
+  message: \/?gists\/([^\/]+)?\/commits($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-407
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/keys\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/keys\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-408
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces\/secrets($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces\/secrets($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-409
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/members($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/members($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-410
+  patterns:
+    - pattern-regex: (\/?apps\/[^\/\s'"$]+)
+  message: \/?apps\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-411
+  patterns:
+    - pattern-regex: (\/?user\/codespaces\/([^\/]+)?\/start($|"|'|\s))
+  message: \/?user\/codespaces\/([^\/]+)?\/start($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-412
+  patterns:
+    - pattern-regex: (\/?user\/codespaces($|"|'|\s))
+  message: \/?user\/codespaces($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-413
+  patterns:
+    - pattern-regex: (\/?octocat($|"|'|\s))
+  message: \/?octocat($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-414
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/import\/authors\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/import\/authors\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-415
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/migrations\/([^\/]+)?\/repos\/([^\/]+)?\/lock($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/migrations\/([^\/]+)?\/repos\/([^\/]+)?\/lock($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-416
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/readme($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/readme($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-417
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/blocks($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/blocks($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-418
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/tags\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/releases\/tags\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-419
+  patterns:
+    - pattern-regex: (\/?marketplace_listing\/plans\/([^\/]+)?\/accounts($|"|'|\s))
+  message: \/?marketplace_listing\/plans\/([^\/]+)?\/accounts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-420
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/deployment_protection_rule($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/deployment_protection_rule($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-421
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/copilot\/billing($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/copilot\/billing($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-422
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/secret-scanning\/alerts($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/secret-scanning\/alerts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-423
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/failed_invitations($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/failed_invitations($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-424
+  patterns:
+    - pattern-regex: (\/?user\/migrations\/([^\/]+)?\/archive($|"|'|\s))
+  message: \/?user\/migrations\/([^\/]+)?\/archive($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-425
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/events($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/events($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-426
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/personal-access-token-requests\/([^\/]+)?\/repositories($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/personal-access-token-requests\/([^\/]+)?\/repositories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-427
+  patterns:
+    - pattern-regex: (\/?projects\/columns\/([^\/]+)?\/moves($|"|'|\s))
+  message: \/?projects\/columns\/([^\/]+)?\/moves($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-428
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/workflows\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/workflows\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-429
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces\/secrets\/public-key($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces\/secrets\/public-key($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-430
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/statuses\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/statuses\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-431
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/traffic\/popular\/paths($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/traffic\/popular\/paths($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-432
+  patterns:
+    - pattern-regex: (\/?gists\/[^\/\s'"$]+)
+  message: \/?gists\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-433
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/branches\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-434
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/projects($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/projects($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-435
+  patterns:
+    - pattern-regex: (\/?user\/issues($|"|'|\s))
+  message: \/?user\/issues($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-436
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/rules\/branches\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/rules\/branches\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-437
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/orgs($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/orgs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-438
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/events\/orgs\/[^\/\s'"$]+)
+  message: \/?users\/([^\/]+)?\/events\/orgs\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-439
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/migrations\/([^\/]+)?\/repositories($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/migrations\/([^\/]+)?\/repositories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-440
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/runners\/registration-token($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/runners\/registration-token($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-441
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/codespaces\/secrets\/public-key($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/codespaces\/secrets\/public-key($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-442
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/members\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/members\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-443
+  patterns:
+    - pattern-regex: (\/?user\/repository_invitations($|"|'|\s))
+  message: \/?user\/repository_invitations($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-444
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/secret-scanning\/alerts\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/secret-scanning\/alerts\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-445
+  patterns:
+    - pattern-regex: (\/?app\/installation-requests($|"|'|\s))
+  message: \/?app\/installation-requests($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-446
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/personal-access-token-requests\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/personal-access-token-requests\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-447
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/workflows\/([^\/]+)?\/enable($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/workflows\/([^\/]+)?\/enable($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-448
+  patterns:
+    - pattern-regex: (\/?licenses\/[^\/\s'"$]+)
+  message: \/?licenses\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-449
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/([^\/]+)?\/comments($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/([^\/]+)?\/comments($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-450
+  patterns:
+    - pattern-regex: (\/?licenses($|"|'|\s))
+  message: \/?licenses($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-451
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks\/([^\/]+)?\/deliveries\/([^\/]+)?\/attempts($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks\/([^\/]+)?\/deliveries\/([^\/]+)?\/attempts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-452
+  patterns:
+    - pattern-regex: (\/?app\/installations($|"|'|\s))
+  message: \/?app\/installations($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-453
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/settings\/billing\/packages($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/settings\/billing\/packages($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-454
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/versions\/[^\/\s'"$]+)
+  message: \/?users\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/versions\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-455
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/collaborators\/([^\/]+)?\/permission($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/collaborators\/([^\/]+)?\/permission($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-456
+  patterns:
+    - pattern-regex: (\/?user\/email\/visibility($|"|'|\s))
+  message: \/?user\/email\/visibility($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-457
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/personal-access-tokens\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/personal-access-tokens\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-458
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/gists($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/gists($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-459
+  patterns:
+    - pattern-regex: (\/?gists($|"|'|\s))
+  message: \/?gists($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-460
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces\/devcontainers($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces\/devcontainers($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-461
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/update-branch($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/update-branch($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-462
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions\/([^\/]+)?\/reactions\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/discussions\/([^\/]+)?\/reactions\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-463
+  patterns:
+    - pattern-regex: (\/?user\/followers($|"|'|\s))
+  message: \/?user\/followers($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-464
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/stats\/contributors($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/stats\/contributors($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-465
+  patterns:
+    - pattern-regex: (\/?repositories($|"|'|\s))
+  message: \/?repositories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-466
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/docker\/conflicts($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/docker\/conflicts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-467
+  patterns:
+    - pattern-regex: (\/?user\/migrations\/([^\/]+)?\/repositories($|"|'|\s))
+  message: \/?user\/migrations\/([^\/]+)?\/repositories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-468
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/oidc\/customization\/sub($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/oidc\/customization\/sub($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-469
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/versions\/([^\/]+)?\/restore($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/versions\/([^\/]+)?\/restore($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-470
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/files($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pulls\/([^\/]+)?\/files($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-471
+  patterns:
+    - pattern-regex: (\/?repositories\/([^\/]+)?\/environments\/([^\/]+)?\/secrets\/public-key($|"|'|\s))
+  message: \/?repositories\/([^\/]+)?\/environments\/([^\/]+)?\/secrets\/public-key($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-472
+  patterns:
+    - pattern-regex: (\/?user\/codespaces\/([^\/]+)?\/publish($|"|'|\s))
+  message: \/?user\/codespaces\/([^\/]+)?\/publish($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-473
+  patterns:
+    - pattern-regex: (\/?marketplace_listing\/stubbed\/plans($|"|'|\s))
+  message: \/?marketplace_listing\/stubbed\/plans($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-474
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/comments($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/comments($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-475
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/rulesets\/rule-suites($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/rulesets\/rule-suites($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-476
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/default-setup($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/default-setup($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-477
+  patterns:
+    - pattern-regex: (\/?user\/codespaces\/([^\/]+)?\/machines($|"|'|\s))
+  message: \/?user\/codespaces\/([^\/]+)?\/machines($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-478
+  patterns:
+    - pattern-regex: (\/?gists\/([^\/]+)?\/comments($|"|'|\s))
+  message: \/?gists\/([^\/]+)?\/comments($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-479
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/migrations\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/migrations\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-480
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/forks($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/forks($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-481
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/settings\/billing\/packages($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/settings\/billing\/packages($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-482
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/settings\/billing\/actions($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/settings\/billing\/actions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-483
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/members\/([^\/]+)?\/codespaces($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/members\/([^\/]+)?\/codespaces($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-484
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces\/new($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/codespaces\/new($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-485
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/members\/([^\/]+)?\/copilot($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/members\/([^\/]+)?\/copilot($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-486
+  patterns:
+    - pattern-regex: (\/?versions($|"|'|\s))
+  message: \/?versions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-487
+  patterns:
+    - pattern-regex: (\/?search\/commits($|"|'|\s))
+  message: \/?search\/commits($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-488
+  patterns:
+    - pattern-regex: (\/?user\/codespaces\/secrets($|"|'|\s))
+  message: \/?user\/codespaces\/secrets($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-489
+  patterns:
+    - pattern-regex: (\/?user\/migrations\/[^\/\s'"$]+)
+  message: \/?user\/migrations\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-490
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/workflows\/([^\/]+)?\/timing($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/workflows\/([^\/]+)?\/timing($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-491
+  patterns:
+    - pattern-regex: (\/?user\/projects($|"|'|\s))
+  message: \/?user\/projects($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-492
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/pages\/health($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/pages\/health($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-493
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/branches($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/branches($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-494
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/members\/([^\/]+)?\/codespaces\/([^\/]+)?\/stop($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/members\/([^\/]+)?\/codespaces\/([^\/]+)?\/stop($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-495
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/invitations($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/invitations($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-496
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/repos($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/teams\/([^\/]+)?\/repos($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-497
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks\/([^\/]+)?\/deliveries($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks\/([^\/]+)?\/deliveries($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-498
+  patterns:
+    - pattern-regex: (\/?user\/migrations\/([^\/]+)?\/repos\/([^\/]+)?\/lock($|"|'|\s))
+  message: \/?user\/migrations\/([^\/]+)?\/repos\/([^\/]+)?\/lock($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-499
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/comments\/([^\/]+)?\/reactions\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/comments\/([^\/]+)?\/reactions\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-500
+  patterns:
+    - pattern-regex: (\/?user\/subscriptions($|"|'|\s))
+  message: \/?user\/subscriptions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-501
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/([^\/]+)?\/status($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/commits\/([^\/]+)?\/status($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-502
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/settings\/billing\/shared-storage($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/settings\/billing\/shared-storage($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-503
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/codespaces\/secrets\/([^\/]+)?\/repositories($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/codespaces\/secrets\/([^\/]+)?\/repositories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-504
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/outside_collaborators\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/outside_collaborators\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-505
+  patterns:
+    - pattern-regex: (\/?markdown($|"|'|\s))
+  message: \/?markdown($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-506
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/dependency-graph\/snapshots($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/dependency-graph\/snapshots($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-507
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/workflows\/([^\/]+)?\/dispatches($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/workflows\/([^\/]+)?\/dispatches($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-508
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/merges($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/merges($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-509
+  patterns:
+    - pattern-regex: (\/?user\/packages\/([^\/]+)?\/?([^\/]+)?\/restore[^\/\s'"$]+)
+  message: \/?user\/packages\/([^\/]+)?\/?([^\/]+)?\/restore[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-510
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/organization-secrets($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/organization-secrets($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-511
+  patterns:
+    - pattern-regex: (\/?feeds($|"|'|\s))
+  message: \/?feeds($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-512
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/dependabot\/secrets\/([^\/]+)?\/repositories($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/dependabot\/secrets\/([^\/]+)?\/repositories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-513
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/rulesets\/rule-suites\/[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/rulesets\/rule-suites\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-514
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/jobs\/([^\/]+)?\/logs($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/jobs\/([^\/]+)?\/logs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-515
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/topics($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/topics($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-516
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/tarball\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/tarball\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-517
+  patterns:
+    - pattern-regex: (\/?app\/hook\/config($|"|'|\s))
+  message: \/?app\/hook\/config($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-518
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/assignees($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/assignees($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-519
+  patterns:
+    - pattern-regex: (\/?gitignore\/templates\/[^\/\s'"$]+)
+  message: \/?gitignore\/templates\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-520
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/invitations\/([^\/]+)?\/teams($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/invitations\/([^\/]+)?\/teams($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-521
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/dependency-graph\/sbom($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/dependency-graph\/sbom($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-522
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/installation($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/installation($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-523
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/subscribers($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/subscribers($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-524
+  patterns:
+    - pattern-regex: (\/?installation\/token($|"|'|\s))
+  message: \/?installation\/token($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-525
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/stats\/participation($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/stats\/participation($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-526
+  patterns:
+    - pattern-regex: (\/?codes_of_conduct($|"|'|\s))
+  message: \/?codes_of_conduct($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-527
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/attempts\/([^\/]+)?\/logs($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/attempts\/([^\/]+)?\/logs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-528
+  patterns:
+    - pattern-regex: (\/?user\/codespaces\/secrets\/([^\/]+)?\/repositories\/[^\/\s'"$]+)
+  message: \/?user\/codespaces\/secrets\/([^\/]+)?\/repositories\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-529
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/?([^\/]+)?\/?[^\/\s'"$]+)
+  message: \/?orgs\/([^\/]+)?\/?([^\/]+)?\/?[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-530
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/sarifs($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/sarifs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-531
+  patterns:
+    - pattern-regex: (\/?advisories($|"|'|\s))
+  message: \/?advisories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-532
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks\/([^\/]+)?\/deliveries\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/hooks\/([^\/]+)?\/deliveries\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-533
+  patterns:
+    - pattern-regex: (\/?marketplace_listing\/accounts\/[^\/\s'"$]+)
+  message: \/?marketplace_listing\/accounts\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-534
+  patterns:
+    - pattern-regex: (\/?user\/public_emails($|"|'|\s))
+  message: \/?user\/public_emails($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-535
+  patterns:
+    - pattern-regex: (\/?app\/hook\/deliveries\/[^\/\s'"$]+)
+  message: \/?app\/hook\/deliveries\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-536
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/trees($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/trees($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-537
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/import\/lfs($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/import\/lfs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-538
+  patterns:
+    - pattern-regex: (\/?search\/issues($|"|'|\s))
+  message: \/?search\/issues($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-539
+  patterns:
+    - pattern-regex: (\/?user\/codespaces\/secrets\/public-key($|"|'|\s))
+  message: \/?user\/codespaces\/secrets\/public-key($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-540
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/codeql\/databases\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/codeql\/databases\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-541
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/copilot\/billing\/seats($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/copilot\/billing\/seats($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-542
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/force-cancel($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/force-cancel($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-543
+  patterns:
+    - pattern-regex: (\/?marketplace_listing\/plans($|"|'|\s))
+  message: \/?marketplace_listing\/plans($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-544
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/actions\/runners($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/actions\/runners($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-545
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/versions($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/versions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-546
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/secret-scanning\/alerts\/([^\/]+)?\/locations($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/secret-scanning\/alerts\/([^\/]+)?\/locations($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-547
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/social_accounts($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/social_accounts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-548
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/versions($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/packages\/([^\/]+)?\/?([^\/]+)?\/versions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-549
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/dependabot\/secrets\/public-key($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/dependabot\/secrets\/public-key($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-550
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/check-suites($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/check-suites($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-551
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/attempts\/([^\/]+)?\/jobs($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/runs\/([^\/]+)?\/attempts\/([^\/]+)?\/jobs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-552
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/subscriptions($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/subscriptions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-553
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/teams($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/teams($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-554
+  patterns:
+    - pattern-regex: (\/?user\/memberships\/orgs($|"|'|\s))
+  message: \/?user\/memberships\/orgs($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-555
+  patterns:
+    - pattern-regex: (\/?gists\/starred($|"|'|\s))
+  message: \/?gists\/starred($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-556
+  patterns:
+    - pattern-regex: (\/?projects\/([^\/]+)?\/collaborators\/([^\/]+)?\/permission($|"|'|\s))
+  message: \/?projects\/([^\/]+)?\/collaborators\/([^\/]+)?\/permission($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-557
+  patterns:
+    - pattern-regex: (\/?rate_limit($|"|'|\s))
+  message: \/?rate_limit($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-558
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/collaborators($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/collaborators($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-559
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/received_events\/public($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/received_events\/public($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-560
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/trees\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/trees\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-561
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/packages($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/packages($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-562
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/compare\/([^\/]+)?...[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/compare\/([^\/]+)?...[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-563
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/tags($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/tags($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-564
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/timeline($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/issues\/([^\/]+)?\/timeline($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-565
+  patterns:
+    - pattern-regex: (\/?users\/([^\/]+)?\/events\/public($|"|'|\s))
+  message: \/?users\/([^\/]+)?\/events\/public($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-566
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/environments\/([^\/]+)?\/deployment_protection_rules\/apps($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/environments\/([^\/]+)?\/deployment_protection_rules\/apps($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-567
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/hooks\/([^\/]+)?\/deliveries\/([^\/]+)?\/attempts($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/hooks\/([^\/]+)?\/deliveries\/([^\/]+)?\/attempts($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-568
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/tags($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/tags($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-569
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/properties\/values($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/properties\/values($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-570
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/commits($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/commits($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-571
+  patterns:
+    - pattern-regex: (\/?repositories\/([^\/]+)?\/environments\/([^\/]+)?\/secrets($|"|'|\s))
+  message: \/?repositories\/([^\/]+)?\/environments\/([^\/]+)?\/secrets($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-572
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/jobs\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/actions\/jobs\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-573
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/analyses($|"|'|\s))
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/code-scanning\/analyses($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-574
+  patterns:
+    - pattern-regex: (\/?orgs\/([^\/]+)?\/settings\/billing\/actions($|"|'|\s))
+  message: \/?orgs\/([^\/]+)?\/settings\/billing\/actions($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-575
+  patterns:
+    - pattern-regex: (\/?user\/installations\/([^\/]+)?\/repositories($|"|'|\s))
+  message: \/?user\/installations\/([^\/]+)?\/repositories($|"|'|\s)|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-576
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/compare\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/compare\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO
+
+- id: find-routes-577
+  patterns:
+    - pattern-regex: (\/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/blobs\/[^\/\s'"$]+)
+  message: \/?repos\/([^\/]+)?\/?([^\/]+)?\/git\/blobs\/[^\/\s'"$]+|Semgrep found routes related call [$1]
+  languages: [bash]
+  severity: INFO

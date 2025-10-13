@@ -1,0 +1,4 @@
+Greg Tystahl, Jonah Ghebremichael, Siddharth Muralee, Sourag Cherupattamoolayil, Antonio 
+Bianchi, Aravind Machiry, Alexandros Kapravelos, and William Enck, Cosseter: GitHub Actions 
+Permission Reduction Using Demand-Driven Static Analysis, in Proceedings of the IEEE 
+Symposium on Security and Privacy (S&P), 2026

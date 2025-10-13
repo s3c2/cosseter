@@ -1,0 +1,11 @@
+# Use the official Python image from the Docker Hub
+FROM python:3.11-slim
+
+# Set the working directory in the container
+WORKDIR /BashAnalyzer
+
+# Copy requirements file and install Python dependencies
+COPY . /BashAnalyzer/
+RUN pip install --no-cache-dir -r requirements.txt
+
+CMD ["celery", "-A", "worker", "worker", "--loglevel=INFO", "--concurrency=40", "--max-tasks-per-child=1"]

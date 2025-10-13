@@ -1,0 +1,168 @@
+name: Permission Test Workflow
+on:
+  push:
+    branches: [main]
+  pull_request:
+  issues:
+    types: [opened]
+
+jobs:
+  test-git-permissions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Commands - Read Permissions
+        run: |
+          # These should trigger contents:read
+          git clone https://github.com/owner/repo.git
+          git fetch origin main
+          git pull origin develop
+          git ls-remote https://github.com/owner/repo.git
+          git archive --remote=origin master
+
+      - name: Git Commands - Write Permissions
+        run: |
+          # These should trigger contents:write
+          git push origin main
+          git push --tags
+          git submodule update --init
+          git http-push https://github.com/owner/repo.git
+
+      - name: Git Commands - No Permissions
+        run: |
+          # These should not require permissions
+          git add .
+          git commit -m "Test commit"
+          git branch feature-branch
+          git status
+          git log --oneline
+
+  test-gh-cli-permissions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: GH CLI - Actions Permissions
+        run: |
+          # actions:read
+          gh run list
+          gh run view 12345
+          gh workflow list
+          gh workflow view build.yml
+
+          # actions:write
+          gh run cancel 12345
+          gh run rerun 12345
+          gh workflow disable build.yml
+          gh workflow enable test.yml
+
+      - name: GH CLI - Contents Permissions
+        run: |
+          # contents:read
+          gh release download v1.0.0
+          gh release view latest
+          gh repo clone owner/repo
+
+          # contents:write
+          gh release create v2.0.0
+          gh release upload v1.0.0 ./artifact.zip
+          gh pr merge 123 --squash
+
+      - name: GH CLI - Issues & PR Permissions
+        run: |
+          # issues:read
+          gh issue list --limit 10
+          gh issue view 456
+
+          # issues:write
+          gh issue create --title "Bug report"
+          gh issue close 789
+          gh issue comment 456 --body "Fixed"
+
+          # pull_requests:read/write
+          gh pr view 123
+          gh pr create --title "Feature"
+          gh pr review 123 --approve
+          gh pr merge 123
+
+      - name: GH CLI - Administration & Secrets
+        run: |
+          # administration:write
+          gh repo create new-repo --public
+          gh repo fork owner/repo
+
+          # secrets:read/write
+          gh secret list
+          gh secret set API_KEY
+
+  test-api-calls:
+    runs-on: ubuntu-latest
+    steps:
+      - name: CURL API Calls with Different Methods
+        run: |
+          # GET requests (default)
+          curl https://api.github.com/repos/owner/repo
+          curl https://api.github.com/repos/owner/repo/issues
+
+          # POST requests
+          curl -X POST https://api.github.com/repos/owner/repo/issues
+          curl --request POST https://api.github.com/repos/owner/repo/pulls
+
+          # PUT requests
+          curl -X PUT https://api.github.com/repos/owner/repo/subscription
+
+          # DELETE requests
+          curl -X DELETE https://api.github.com/repos/owner/repo/subscription
+
+          # PATCH requests
+          curl -X PATCH https://api.github.com/repos/owner/repo
+
+      - name: WGET API Calls
+        run: |
+          # GET requests
+          wget https://api.github.com/repos/owner/repo/releases
+
+          # POST requests
+          wget --post-data='{"title":"Issue"}' https://api.github.com/repos/owner/repo/issues
+          wget --post-file=data.json https://api.github.com/repos/owner/repo/hooks
+
+      - name: GH API Direct Calls
+        run: |
+          # gh api calls with various endpoints
+          gh api repos/owner/repo/actions/runs
+          gh api repos/owner/repo/pulls/123/reviews
+          gh api -X POST repos/owner/repo/issues
+          gh api graphql -f query='query { viewer { login }}'
+
+  test-workflow-variables:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Using Workflow Context Variables
+        run: |
+          # These workflow variables should be resolved
+          # WORKFLOW_VAR_0=${{github.event.issue.url}}
+          curl ${{ github.event.issue.url }}
+          curl ${{ github.event.pull_request.url }}
+          curl ${{ github.event.repository.url }}
+
+          # Complex variable usage
+          gh api ${{ github.event.issue.comments_url }}
+          wget ${{ github.event.release.assets_url }}
+
+  test-api-routes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Direct API Route References
+        run: |
+          # These patterns should be detected by route regexes
+          echo "Calling /repos/owner/repo/deployments/123"
+          echo "Accessing /orgs/myorg/actions/runners/456"
+          echo "Using /repos/owner/repo/pulls/789/merge"
+          echo "Fetching /repos/owner/repo/contents/README.md"
+          echo "Updating /repos/owner/repo/hooks/321"
+          echo "Getting /search/repositories"
+          echo "Checking /user/installations"
+
+          # More complex routes
+          API_URL="/repos/owner/repo/actions/secrets/public-key"
+          curl "https://api.github.com${API_URL}"
+
+          ROUTE="/repos/owner/repo/vulnerability-alerts"
+          gh api "${ROUTE}"
