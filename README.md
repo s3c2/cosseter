@@ -11,7 +11,7 @@ This project is available thanks to the **Secure Software Supply Chain Center (S
 ### Dataset Availability
 
 Our complete datasets used in this research are available on Zenodo:
-- **Full Workflow Dataset**: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo..svg)]()
+- **Full Workflow Dataset**: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17344798.svg)](https://doi.org/10.5281/zenodo.17344798)
 - **Full Action Analysis Results**: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17344742.svg)](https://doi.org/10.5281/zenodo.17344742)
 - **Permission Comparison Data**: 
     - JSON Format (all): [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17344769.svg)](https://doi.org/10.5281/zenodo.17344769)
