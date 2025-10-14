@@ -171,13 +171,13 @@ We welcome contributions! Please see our contribution guidelines:
 
 ## 📜 License
 
-This project is licensed under GPL V3
+This project is licensed under GPL v2
 
 ## 🛠️ Major Modified Dependencies
 * **ARGUS**: [Paper](https://www.usenix.org/system/files/usenixsecurity23-muralee.pdf)|[Repo](https://github.com/purs3lab/Argus)
     - Modified to produce custom WIRs for workflow ingestion
 * **ODGen-Fast**: [Paper](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10179352&casa_token=IeEHsUfHBycAAAAA:GpPhhSv2e0TlVUN2F9IsEm2N_Yh-4t1ZDIarBtWBLmv0huIYTa_Xu7YW_PmMyaWKaGkehQpc)|[Repo](https://github.com/fast-sp-2023/fast/tree/main?tab=readme-ov-file)
-    - Implemented our Demand-Driven JavaScript analysis on top of static analysis base provided
+    - Implemented our Demand-Driven JavaScript analysis on top of the static analysis base provided
     - Improved upon general analysis and added support for handling packed JavaScript
 * **Semgrep**: [Repo](https://github.com/semgrep/semgrep)
     - We created custom Semgrep rules and used them to perform the Bash analysis
