@@ -21,8 +21,8 @@ Our complete datasets used in this research are available on Zenodo:
 
 Cosseter performs multi-layered security analysis of GitHub Actions workflows through:
 
-1. **JavaScript Action Analysis**: Static analysis of custom JavaScript actions to extract API calls and permission requirements
-2. **Bash Script Analysis**: Analysis of shell commands and scripts within workflow steps to identify file system and system-level permissions
+1. **JavaScript Action Analysis**: Static analysis of third-party JavaScript actions to extract API calls and permission requirements
+2. **Bash Script Analysis**: Analysis of shell commands within workflow steps to identify more permission requirements
 3. **Permission Extraction**: Automated extraction and classification of security-critical permissions
 4. **Workflow Enhancement**: Generation of enhanced workflows with detailed permission annotations
 
@@ -35,8 +35,7 @@ The tool consists of several interconnected components:
 - **ActionAnalyzer/**: JavaScript action analysis engine with Celery-based distributed processing
 - **BashAnalyzer/**: Bash script and shell command analysis using Semgrep rules
 - **PermissionEvaluation/**: Permission extraction and classification system
-- **WorkflowFrontend/**: Web interface for workflow processing and visualization
-- **outputWorkflows/**: Enhanced workflow generation system
+- **WorkflowFrontend/**: Workflow processing and WIR generation
 
 ### Supporting Infrastructure
 
@@ -57,7 +56,7 @@ The tool consists of several interconnected components:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/s3c2/Cosseter.git
+   git clone https://github.com/s3c2/cosseter.git
    ```
 
 2. **Install python dependencies**
@@ -93,8 +92,8 @@ python3 runTool.py
 The tool will:
 1. Present available test workflow sets from `workflowInputs/`
 2. Process workflows through the analysis pipeline
-3. Generate enhanced workflows with permission annotations
-4. Store results in MongoDB collections
+3. Store intermediate analysis results for JavaScript actions in MongoDB and Bash steps in JSON files 
+4. Generate enhanced workflows with permission annotations
 
 ### Available Test Sets
 
@@ -117,7 +116,7 @@ The tool will:
 Results are stored in multiple formats:
 
 - **MongoDB Collections**: Structured analysis results and metadata
-- **Enhanced Workflows**: YAML workflows with permission annotations in `updatedWorkflows/`
+- **Enhanced Workflows**: Workflow YAMLs with permission annotations in `updatedWorkflows/`
 
 ## 📁 Project Structure
 
@@ -173,7 +172,7 @@ We welcome contributions! Please see our contribution guidelines:
 
 This project is licensed under GPL v2
 
-## 🛠️ Major Modified Dependencies
+## 🛠️ Major Integrated and or Modified Dependencies
 * **ARGUS**: [Paper](https://www.usenix.org/system/files/usenixsecurity23-muralee.pdf)|[Repo](https://github.com/purs3lab/Argus)
     - Modified to produce custom WIRs for workflow ingestion
 * **ODGen-Fast**: [Paper](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10179352&casa_token=IeEHsUfHBycAAAAA:GpPhhSv2e0TlVUN2F9IsEm2N_Yh-4t1ZDIarBtWBLmv0huIYTa_Xu7YW_PmMyaWKaGkehQpc)|[Repo](https://github.com/fast-sp-2023/fast/tree/main?tab=readme-ov-file)
@@ -193,5 +192,5 @@ This project is licensed under GPL v2
 ### Getting Help
 
 - Open an issue on GitHub for bug reports
-- Contact the research team at North Carolina State University for research collaborations
+- Contact the research team at S3C2 and North Carolina State University for research collaborations
 - Check the documentation in individual component directories
