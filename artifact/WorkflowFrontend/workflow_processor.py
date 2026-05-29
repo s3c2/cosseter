@@ -56,6 +56,8 @@ class WorkflowProcessor:
         os.makedirs(self.actions_dir, exist_ok=True)
         # Also ensure the relative path used by clone_repo exists
         os.makedirs('/app/sharedDirectory/actions', exist_ok=True)
+        # Make sure the workflow directory exists as well
+        os.makedirs(self.workflows_dir, exist_ok=True)
         
         self.connect_to_mongodb()
         self.setup_collection()
